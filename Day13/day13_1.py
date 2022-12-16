@@ -132,8 +132,6 @@ class SignalStorage:
             if result:
                 self.result.append(i + 1)
 
-        print(f'Sum of indices: {sum(self.result)}')
-
     def check_signals(self, left_signal, right_signal):        
         left_element_type = left_signal.get_element_type()
         right_element_type = right_signal.get_element_type()
@@ -210,8 +208,7 @@ def main():
     
     print('# First question')
     signal_storage = SignalStorage('input1.txt')
-    
-    print('# Second question')
+    print(f'Sum of indices: {sum(signal_storage.result)}')
 
 
 if __name__ == '__main__':
