@@ -1,4 +1,4 @@
-""" Advent of Code 2022, Day 13, Part 1
+""" Advent of Code 2022, Day 13, Part2
     Author: Chi-Kit Pao
 """
 
@@ -6,8 +6,8 @@ import os
 
 
 def debug_output(message):
-    #print(message)
-    pass
+    print(message)
+    #pass
 
 
 class Signal:
@@ -24,6 +24,9 @@ class Signal:
     def __init__(self, data_string):
         # data strings act like instructions of a programm
         self.data_string = data_string
+        self.greater_count = 0  # greater than a number of other elements
+
+        # Remark: Update method "reset_process_data" after adding / changing initialization 
         self.data_pointer = 0
         self.pseudo_list_mode = Signal.PSEUDO_LIST_MODE_NONE
         self.list_to_int_level = 0
@@ -83,6 +86,11 @@ class Signal:
         else:
             assert False, f'Unknown element: {self.data_string[self.data_pointer]}'
 
+    def reset_process_data(self):
+        self.data_pointer = 0
+        self.pseudo_list_mode = Signal.PSEUDO_LIST_MODE_NONE
+        self.list_to_int_level = 0
+
     def update_data_pointer(self):
         assert self.data_pointer < len(self.data_string)
 
@@ -103,33 +111,47 @@ class Signal:
                     self.data_pointer += 1
 
 
-class SignalStorage:
+class SignalStorage2:
     def __init__(self, input_file_name: str):
-        self.left_signals = []
-        self.right_signals = []
-        self.result = []  # pair with return value True, one-based
+        self.signals = []
+        self.divider1 = Signal('[[2]]')
+        self.divider2 = Signal('[[6]]')
+        self.signals.append(self.divider1)
+        self.signals.append(self.divider2)
+        self.less_than_count = None   # number of elements which are "less than" oneself 
 
         file_path = os.path.dirname(__file__)
         with open(os.path.join(file_path, input_file_name), 'r') as f:
             lines = list(map(lambda s: s.replace('\n', '').strip(), f.readlines()))
             i = 0
             while i < len(lines):
-                self.left_signals.append(Signal(lines[i + 0]))
-                self.right_signals.append(Signal(lines[i + 1]))
+                self.signals.append(Signal(lines[i + 0]))
+                self.signals.append(Signal(lines[i + 1]))
                 i += 3
+        
+        self.less_than_count = [0] * len(self.signals)
+        
+        for i in range(len(self.signals)):
+            for j in range(len(self.signals)):
+                if i >= j:
+                    continue
 
-        assert len(self.left_signals) == len(self.right_signals)
+                result = self.check_signals(self.signals[i], self.signals[j])
+                self.signals[i].reset_process_data()
+                self.signals[j].reset_process_data()
+                if result:
+                    self.less_than_count[i] += 1
+                    self.signals[j].greater_count += 1
+                else:
+                    self.less_than_count[j] += 1
+                    self.signals[i].greater_count += 1
 
-        for i in range(len(self.left_signals)):
-            debug_output(f'{i + 1} left {self.left_signals[i].data_string}')
-            debug_output(f'{i + 1} right {self.right_signals[i].data_string}')
+        self.test_transitivity()
 
-            result = self.check_signals(self.left_signals[i], self.right_signals[i])
-            debug_output(f'{i + 1} result {result}')
-            debug_output('')
-            if result:
-                self.result.append(i + 1)
+        # Sort signals in ascending order.
+        self.signals.sort(key = (lambda x: x.greater_count))
 
+    # REMARK: Relation appears to be transitive.
     def check_signals(self, left_signal, right_signal):        
         left_element_type = left_signal.get_element_type()
         right_element_type = right_signal.get_element_type()
@@ -139,13 +161,11 @@ class SignalStorage:
 
             if left_element_type == right_element_type:
                 if left_element_type == Signal.TYPE_LIST_BEGIN or left_element_type == Signal.TYPE_LIST_END:
-                    debug_output(f'left: {left_signal.process_element()}')
-                    debug_output(f'right: {right_signal.process_element()}')
+                    left_signal.process_element()
+                    right_signal.process_element()
                 elif left_element_type == Signal.TYPE_INT:
                     left_int = int(left_signal.process_element())
                     right_int = int(right_signal.process_element())
-                    debug_output(f'left: {left_int}')
-                    debug_output(f'right: {right_int}')
                     if left_int < right_int:
                         return True
                     elif left_int > right_int:
@@ -153,46 +173,31 @@ class SignalStorage:
             else:
                 if left_element_type == Signal.TYPE_LIST_BEGIN:
                     if right_element_type == Signal.TYPE_LIST_END:
-                        # Only process for output
-                        debug_output(f'left: {left_signal.process_element()}')
-                        debug_output(f'right: {right_signal.process_element()}')
                         return False
                     else:
                         assert right_element_type == Signal.TYPE_INT
-                        debug_output(f'left: {left_signal.process_element()}')
+                        left_signal.process_element()
                         right_signal.process_int_as_list()
-                        debug_output(f'right(int as list): {right_signal.process_element()}')
+                        right_signal.process_element()
                 elif left_element_type == Signal.TYPE_LIST_END:
                     if right_element_type == Signal.TYPE_LIST_BEGIN:
-                        # Only process for output
-                        debug_output(f'left: {left_signal.process_element()}')
-                        debug_output(f'right: {right_signal.process_element()}')
                         return True
                     else:
                         assert right_element_type == Signal.TYPE_INT
-                        # Only process for output
-                        debug_output(f'left: {left_signal.process_element()}')
-                        debug_output(f'right: {right_signal.process_element()}')
                         return True
                 else:
                     assert left_element_type == Signal.TYPE_INT
                     if right_element_type == Signal.TYPE_LIST_BEGIN:
                         left_signal.process_int_as_list()
-                        debug_output(f'left(int as list): {left_signal.process_element()}')
-                        debug_output(f'right: {right_signal.process_element()}')
+                        left_signal.process_element()
+                        right_signal.process_element()
                     else:
                         assert right_element_type == Signal.TYPE_LIST_END
-                        # Only process for output
-                        debug_output(f'left: {left_signal.process_element()}')
-                        debug_output(f'right: {right_signal.process_element()}')
                         return False
 
             left_element_type = left_signal.get_element_type()
             right_element_type = right_signal.get_element_type()
             if left_element_type != Signal.TYPE_DATA_END and right_element_type == Signal.TYPE_DATA_END:
-                # Only process for output
-                debug_output(f'left: {left_signal.process_element()}')
-                debug_output(f'right: data end')
                 return False        
 
         if right_element_type != Signal.TYPE_DATA_END:
@@ -200,12 +205,23 @@ class SignalStorage:
         else:
             assert False, "both signals ran out of items"
 
+    def get_decorder_key(self):
+        divider1_index = self.signals.index(self.divider1) + 1
+        divider2_index = self.signals.index(self.divider2) + 1
+        return divider1_index * divider2_index
+
+    def test_transitivity(self):
+        print('# Test transitivity')
+        print(len(self.signals), self.less_than_count)
+        for i in range(302):
+            if i not in self.less_than_count:
+                print(f'{i} not in self.less_than_count')
+
 
 def main():
-    
-    print('# First question')
-    signal_storage = SignalStorage('input1.txt')
-    print(f'Sum of indices: {sum(signal_storage.result)}')
+    signal_storage = SignalStorage2('input1.txt')
+    print('# Second question')
+    print(f'Decorder key for the distress signal: {signal_storage.get_decorder_key()}')
 
 
 if __name__ == '__main__':
