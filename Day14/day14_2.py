@@ -150,7 +150,7 @@ def main():
             reservoir.print_map()
             print(f'Units of sand: {reservoir.sand_count}')
         except ValueError:
-            # REMARK: Not Value Error not raised at all
+            # REMARK: ValueError not raised at all. Got result with width_factor = 1.
             print(f'Failed with width factor {width_factor}!')
             width_factor += 1
 
