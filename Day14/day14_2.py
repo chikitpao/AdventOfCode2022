@@ -1,4 +1,4 @@
-""" Advent of Code 2022, Day 14, Part 1
+""" Advent of Code 2022, Day 14, Part 2
     Author: Chi-Kit Pao
 """
 
