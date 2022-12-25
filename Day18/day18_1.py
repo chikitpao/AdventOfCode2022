@@ -73,7 +73,7 @@ class Quiz:
     def global_to_local(self, x, y, z):
         return x - self.origin_x, y - self.origin_y, z - self.origin_z
 
-    def get_neighbor_count(self, droplet: Droplet):
+    def get_surface_count(self, droplet: Droplet):
         count = 0
         x, y, z = self.global_to_local(droplet.x, droplet.y, droplet.z)
         if self.droplet_cube[x - 1][y][z] is None:
@@ -99,7 +99,7 @@ def main():
     quiz = Quiz(file_names[file_names_index])
     count = 0
     for droplet in quiz.droplet_list:
-        count += quiz.get_neighbor_count(droplet)
+        count += quiz.get_surface_count(droplet)
     print('Total surface area', count)
 
 
