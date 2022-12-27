@@ -19,21 +19,29 @@ class Quiz:
         self.working_list: list[Item] = []
         self.__read_numbers(input_file_name)
 
-    def run(self):
+    def run(self, decryption=False):
+        self.working_list = self.original_list.copy()
         length = len(self.working_list)
-        for i in range(len(self.original_list)):
-            item = self.original_list[i]
-            index = self.working_list.index(item)
-            assert index != -1
-            if item.number == 0:
-                continue
-            new_pos = (index + item.number) % (length - 1)
-            # # adjustment for left shift to begin -> move to end
-            # # Only to be conform to test example. Doesn't matter at all for 
-            # # circular list
-            # if new_pos == 0 and self.numbers[i] < 0:
-            #     new_pos = length - 1
-            self.working_list.insert(new_pos, self.working_list.pop(index))
+
+        round_count = 1
+        if decryption:
+            round_count = 10
+            for i in range(len(self.working_list)):
+                self.working_list[i].number *= 811589153
+        for _ in range(round_count):     
+            for i in range(len(self.original_list)):
+                item = self.original_list[i]
+                index = self.working_list.index(item)
+                assert index != -1
+                if item.number == 0:
+                    continue
+                new_pos = (index + item.number) % (length - 1)
+                # # adjustment for left shift to begin -> move to end
+                # # Only to be conform to test example. Doesn't matter at all for 
+                # # circular list
+                # if new_pos == 0 and self.numbers[i] < 0:
+                #     new_pos = length - 1
+                self.working_list.insert(new_pos, self.working_list.pop(index))
 
     def sum(self):
         length = len(self.working_list)
@@ -54,7 +62,6 @@ class Quiz:
             if len(line) > 0:
                 item = Item(int(line))
                 self.original_list.append(item)
-                self.working_list.append(item)
 
 def main():
     file_names = ['test.txt', 'input1.txt']
@@ -62,7 +69,11 @@ def main():
 
     quiz = Quiz(file_names[file_names_index])
     print('# First question')
-    quiz.run()
+    quiz.run(decryption=False)
+    print(f'Sum of three number: {quiz.sum()}')
+
+    print('\n# Second question')
+    quiz.run(decryption=True)
     print(f'Sum of three number: {quiz.sum()}')
 
 if __name__ == '__main__':
