@@ -1,4 +1,4 @@
-""" Advent of Code 2022, Day 21
+""" Advent of Code 2022, Day 21, Part 1
     Author: Chi-Kit Pao
 """
 
@@ -59,8 +59,7 @@ class Quiz:
                 if monkey.op1 is not None and monkey.op2 is not None:
                     monkey.do_operation()
                     self.calculating_monkeys.remove(monkey)
-            if not done_substitution:
-                pass
+            assert done_substitution
 
         root_number = self.monkeys['root'].number
         print(f'Root yells {root_number}!')
