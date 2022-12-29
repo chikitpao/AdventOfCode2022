@@ -202,7 +202,7 @@ def main():
 
     print('# Second question')
     print(f'The final password is {1000 * (quiz.y + 1) + 4 * (quiz.x + 1) + quiz.facing}.')
-    # TODO 129187 -> too high
+
 
 if __name__ == '__main__':
     main()
