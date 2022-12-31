@@ -116,10 +116,10 @@ class Quiz:
         return False
 
     def run1(self) -> int:
-        movement_detected = False
         round = 1
         debug_output(f'start {self.elf_pos}')
         while True:
+            movement_detected = False
             assert len(self.elves) == len(self.elf_pos)
             debug_output(f'round: {round}')
             self.proposed_steps.clear()
@@ -135,6 +135,7 @@ class Quiz:
             if not movement_detected:
                 break
             elif round == 10:
+                debug_output(f'{round} {self.elf_pos}')
                 break
             debug_output(f'{round} {self.elf_pos}')
             round += 1
