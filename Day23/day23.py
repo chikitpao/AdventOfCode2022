@@ -1,9 +1,10 @@
-""" Advent of Code 2022, Day 23, Part 1
+""" Advent of Code 2022, Day 23
     Author: Chi-Kit Pao
 """
 
 
 import os
+import time
 import typing as ty
 
 
@@ -149,7 +150,29 @@ class Quiz:
             max_x = elf.x if max_x is None else max(max_x, elf.x)
             min_y = elf.y if min_y is None else min(min_y, elf.y)
             max_y = elf.y if max_y is None else max(max_y, elf.y)
-        return (max_x - min_x + 1) * (max_y - min_y + 1) - len(self.elves)   
+        return (max_x - min_x + 1) * (max_y - min_y + 1) - len(self.elves)
+
+    def run2(self) -> int:
+        round = 1
+        debug_output(f'start {self.elf_pos}')
+        while True:
+            movement_detected = False
+            assert len(self.elves) == len(self.elf_pos)
+            debug_output(f'round: {round}')
+            self.proposed_steps.clear()
+            # 1. Elves propose their step
+            for elf in self.elves:
+                self.add_proposed_step(elf.propose_step(self))
+            # 2. Elves try to move
+            for elf in self.elves:
+                pos = elf.proposed_step()
+                if pos is not None and not self.is_blocked(elf.proposed_step()):
+                    elf.move(self)
+                    movement_detected = True
+            if not movement_detected:
+                return round
+            debug_output(f'{round} {self.elf_pos}')
+            round += 1 
 
     def __read_data(self, input_file_name: str):
         file_path = os.path.dirname(__file__)
@@ -169,6 +192,12 @@ def main():
     
     print('# First question')
     print(f'Empty ground tiles: {quiz.run1()}')
+
+    start_time = time.time()
+    print('# Second question')
+    quiz = Quiz(file_names[file_names_index])
+    print(f'Number of the first round where no Elf moves: {quiz.run2()}')
+    print(f'Time elapsed: {time.time() - start_time} s')
     
 
 if __name__ == '__main__':
