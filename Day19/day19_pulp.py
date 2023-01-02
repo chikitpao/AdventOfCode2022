@@ -94,10 +94,22 @@ class Blueprint:
                 problem += self.robots[j][-1] == self.robots[j][-2] + self.builds[j][-1]
             problem += self.robots[Blueprint.GEODE][i] == self.robots[Blueprint.GEODE][i - 1] + self.builds[Blueprint.GEODE][-1]
 
-        print(problem)
-        status = problem.solve()
+        # debug_output(problem)
+        status = problem.solve(plp.PULP_CBC_CMD(msg=False))
+        debug_output(f'Blueprint {self.number}:')
         debug_output(f'status: {status}')
         debug_output(f'problem.objective.value() {problem.objective.value()}')
+        for i in range(minutes):
+            if self.builds[Blueprint.ORE][i].value() > 0:
+                debug_output(f'{i} build ORE robot')
+            elif self.builds[Blueprint.CLAY][i].value() > 0:
+                debug_output(f'{i} build CLAY robot')
+            elif self.builds[Blueprint.OBSIDIAN][i].value() > 0:
+                debug_output(f'{i} build OBSIDIAN robot')
+            elif self.builds[Blueprint.GEODE][i].value() > 0:
+                debug_output(f'{i} build GEODE robot')
+            else:
+                debug_output(f'{i} wait')
         return problem.objective.value()
 
 
